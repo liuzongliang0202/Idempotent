@@ -1,18 +1,18 @@
-###1.@Idempotent是标注在方法上的注解，它可以被当成通用的幂等性判断工具，当你需要做幂等判断时，不需要编写而外的逻辑，只需要添加一个注解可以完成此功能
+### 1.@Idempotent是标注在方法上的注解，它可以被当成通用的幂等性判断工具，当你需要做幂等判断时，不需要编写而外的逻辑，只需要添加一个注解可以完成此功能
 
-###2.@Rlock是使用redisson实现的分布式锁,可以单独使用
+### 2.@Rlock是使用redisson实现的分布式锁,可以单独使用
 
-###3.@Idempotent包含了@Rlock和@Transactional注解的功能，所以你不需要考虑再在方法上添加锁和事务
+### 3.@Idempotent包含了@Rlock和@Transactional注解的功能，所以你不需要考虑再在方法上添加锁和事务
 
-###4.标注了@Idempotent注解的方法调用顺序是：
+### 4.标注了@Idempotent注解的方法调用顺序是：
 @Rlock              ->     @Transactional              ->      @Idempotent
 RLockInterceptor    ->     TransactionInterceptor      ->      IdempotentAspect
 
-###5.考虑到有些业务需要做幂等判断，但是业务的状态，又有其他地方更改，需要提供一个释放幂等日志的操作，已方便下一次能进入业务逻辑而不是继续返回幂等日志的值
+### 5.考虑到有些业务需要做幂等判断，但是业务的状态，又有其他地方更改，需要提供一个释放幂等日志的操作，已方便下一次能进入业务逻辑而不是继续返回幂等日志的值
 
-###6.RLockInterceptor之所以采用spring的MethodInterceptor而不是直接使用AspectJ注解是因为 @Pointcut注解不支持元注解查找
+### 6.RLockInterceptor之所以采用spring的MethodInterceptor而不是直接使用AspectJ注解是因为 @Pointcut注解不支持元注解查找
 
-###7.@Idempotent参数解释：
+### 7.@Idempotent参数解释：
 enableLock() 表示被注释的业务方法是否需要加分布式锁，默认需要开启，而且幂等业务应该是要保证顺序性的
 
 enableTransaction() 表示被注释的业务方法是否需要加事务等同于@Transactional，在业务方法中你可以使用TransactionAspectSupport.currentTransactionStatus()
@@ -33,7 +33,7 @@ argNames() 表示需要关联的方法参数有哪些
 其他的都是@Idempotent.Transactional注解的参数，和spring @Transactional的功能一致
 
 
-###8.@Idempotent事务实现逻辑解析：
+### 8.@Idempotent事务实现逻辑解析：
 首先默认的spring @Transactional 的拦截功能是通过TransactionInterceptor类实现的，所以我们需要考虑更改它的Advisor中的pointCut
 而spring事务的默认Advisor是通过BeanFactoryTransactionAttributeSourceAdvisor，是通过ProxyTransactionManagementConfiguration配置实现事务的Advisor
 springboot的自动配置TransactionAutoConfiguration会自动加载这个配置,而这个ProxyTransactionManagementConfiguration我们是无法更改的
